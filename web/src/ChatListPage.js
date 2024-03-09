@@ -75,13 +75,14 @@ class ChatListPage extends React.Component {
       name: `chat_${randomName}`,
       createdTime: moment().format(),
       updatedTime: moment().format(),
+      organization: this.props.account.owner,
       displayName: `${i18next.t("chat:New Chat")} - ${randomName}`,
       category: i18next.t("chat:Default Category"),
       type: "AI",
       user: this.props.account.name,
-      user1: `${this.props.account.owner}/${this.props.account.name}`,
+      user1: "",
       user2: "",
-      users: [`${this.props.account.owner}/${this.props.account.name}`],
+      users: [this.props.account.name],
       messageCount: 0,
     };
   }

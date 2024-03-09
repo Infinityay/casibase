@@ -292,7 +292,9 @@ class App extends Component {
     }
 
     if (!this.state.account.isAdmin) {
-      return res;
+      if (!(Conf.ShortcutPageItems.length > 0 && this.state.account.type === "chat-admin")) {
+        return res;
+      }
     }
 
     const domain = Setting.getSubdomain();
@@ -311,7 +313,7 @@ class App extends Component {
       res.push(Setting.getItem(<Link to="/chats">{i18next.t("general:Chats")}</Link>, "/chats"));
       res.push(Setting.getItem(<Link to="/messages">{i18next.t("general:Messages")}</Link>, "/messages"));
       res.push(Setting.getItem(<Link to="/tasks">{i18next.t("general:Frameworks")}</Link>, "/tasks"));
-    } else if (Conf.ShortcutPageItems.length > 0 && domain === "edu" && this.state.account.name !== "admin") {
+    } else if (Conf.ShortcutPageItems.length > 0 && this.state.account.type === "chat-admin") {
       res.push(Setting.getItem(<Link to="/chat">{i18next.t("general:Chat")}</Link>, "/chat"));
       res.push(Setting.getItem(<Link to="/chats">{i18next.t("general:Chats")}</Link>, "/chats"));
       res.push(Setting.getItem(<Link to="/messages">{i18next.t("general:Messages")}</Link>, "/messages"));
@@ -323,6 +325,13 @@ class App extends Component {
       res.push(Setting.getItem(
         <a target="_blank" rel="noreferrer" href={Setting.getMyProfileUrl(this.state.account).replace("/account", "/users")}>
           {i18next.t("general:Users")}
+          {Setting.renderExternalLink()}
+        </a>,
+        "#"));
+
+      res.push(Setting.getItem(
+        <a target="_blank" rel="noreferrer" href={Setting.getMyProfileUrl(this.state.account).replace("/account", "/resources")}>
+          {i18next.t("general:Resources")}
           {Setting.renderExternalLink()}
         </a>,
         "##"));

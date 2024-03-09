@@ -100,12 +100,13 @@ func (c *ApiController) AddMessage() {
 
 	var chat *object.Chat
 	if message.Chat == "" {
-		chat, err = c.addInitialChat(message.Author)
+		chat, err = c.addInitialChat(message.Organization, message.User)
 		if err != nil {
 			c.ResponseError(err.Error())
 			return
 		}
 
+		message.Organization = chat.Organization
 		message.Chat = chat.Name
 	} else {
 		chatId := util.GetId(message.Owner, message.Chat)
@@ -140,15 +141,16 @@ func (c *ApiController) AddMessage() {
 	if success {
 		if chat != nil && chat.Type == "AI" {
 			answerMessage := &object.Message{
-				Owner:       message.Owner,
-				Name:        fmt.Sprintf("message_%s", util.GetRandomName()),
-				CreatedTime: util.GetCurrentTimeEx(message.CreatedTime),
-				// Organization: message.Organization,
+				Owner:        message.Owner,
+				Name:         fmt.Sprintf("message_%s", util.GetRandomName()),
+				CreatedTime:  util.GetCurrentTimeEx(message.CreatedTime),
+				Organization: message.Organization,
 				User:         message.User,
 				Chat:         message.Chat,
-				ReplyTo:      message.GetId(),
+				ReplyTo:      message.Name,
 				Author:       "AI",
 				Text:         "",
+				FileName:     message.FileName,
 				VectorScores: []object.VectorScore{},
 			}
 			_, err = object.AddMessage(answerMessage)

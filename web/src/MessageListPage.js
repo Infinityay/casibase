@@ -53,11 +53,11 @@ class MessageListPage extends React.Component {
       owner: "admin",
       name: `message_${randomName}`,
       createdTime: moment().format(),
-      // organization: "Message Organization - 1",
+      organization: this.props.account.owner,
       user: this.props.account.name,
       chat: "",
       replyTo: "",
-      author: `${this.props.account.owner}/${this.props.account.name}`,
+      author: this.props.account.name,
       text: "",
     };
   }
@@ -188,8 +188,13 @@ class MessageListPage extends React.Component {
             return text;
           }
 
+          let userId = text;
+          if (!userId.includes("/")) {
+            userId = `${record.organization}/${userId}`;
+          }
+
           return (
-            <a target="_blank" rel="noreferrer" href={Setting.getMyProfileUrl(this.props.account).replace("/account", `/users/${text}`)}>
+            <a target="_blank" rel="noreferrer" href={Setting.getMyProfileUrl(this.props.account).replace("/account", `/users/${userId}`)}>
               {text}
             </a>
           );

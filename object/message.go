@@ -36,12 +36,13 @@ type Message struct {
 	Name        string `xorm:"varchar(100) notnull pk" json:"name"`
 	CreatedTime string `xorm:"varchar(100)" json:"createdTime"`
 
-	// Organization string `xorm:"varchar(100)" json:"organization"`
+	Organization string        `xorm:"varchar(100)" json:"organization"`
 	User         string        `xorm:"varchar(100) index" json:"user"`
 	Chat         string        `xorm:"varchar(100) index" json:"chat"`
 	ReplyTo      string        `xorm:"varchar(100) index" json:"replyTo"`
 	Author       string        `xorm:"varchar(100)" json:"author"`
 	Text         string        `xorm:"mediumtext" json:"text"`
+	FileName     string        `xorm:"varchar(100)" json:"fileName"`
 	Comment      string        `xorm:"mediumtext" json:"comment"`
 	TokenCount   int           `json:"tokenCount"`
 	Price        float64       `json:"price"`
@@ -163,15 +164,17 @@ func RefineMessageImages(message *Message, origin string) error {
 			return err
 		}
 
-		for i, match := range matches {
-			ext, content, err := parseBase64Image(match)
+		for _, match := range matches {
+			var content []byte
+			content, err = parseBase64Image(match)
 			if err != nil {
 				return err
 			}
 
-			filename := fmt.Sprintf("%s_%s_image_%d.%s", message.User, message.Name, i, ext)
+			filePath := fmt.Sprintf(`%s\%s\%s\%s`, message.Organization, message.User, message.Chat, message.FileName)
 
-			fileUrl, err := obj.PutObject(message.User, "Casibase-Image", filename, bytes.NewBuffer(content))
+			var fileUrl string
+			fileUrl, err = obj.PutObject(message.User, message.Chat, filePath, bytes.NewBuffer(content))
 			if err != nil {
 				return err
 			}
@@ -181,7 +184,8 @@ func RefineMessageImages(message *Message, origin string) error {
 				fileUrl = tokens[0]
 			}
 
-			httpUrl, err := getUrlFromPath(fileUrl, origin)
+			var httpUrl string
+			httpUrl, err = getUrlFromPath(fileUrl, origin)
 			if err != nil {
 				return err
 			}

@@ -80,38 +80,39 @@ class ChatPage extends BaseListPage {
       name: `chat_${randomName}`,
       createdTime: moment().format(),
       updatedTime: moment().format(),
-      // organization: this.props.account.owner,
+      organization: this.props.account.owner,
       displayName: `${i18next.t("chat:New Chat")} - ${this.getNextChatIndex(chat?.displayName) ?? randomName}`,
       type: "AI",
       user: this.props.account.name,
       category: chat !== undefined ? chat.category : i18next.t("chat:Default Category"),
-      user1: `${this.props.account.owner}/${this.props.account.name}`,
+      user1: "",
       user2: "",
-      users: [`${this.props.account.owner}/${this.props.account.name}`],
+      users: [this.props.account.name],
       clientIp: this.props.account.createdIp,
       userAgent: this.props.account.education,
       messageCount: 0,
     };
   }
 
-  newMessage(text, isHidden) {
+  newMessage(text, fileName, isHidden) {
     const randomName = Setting.getRandomName();
     return {
       owner: "admin",
       name: `message_${randomName}`,
       createdTime: moment().format(),
-      // organization: this.props.account.owner,
+      organization: this.props.account.owner,
       user: this.props.account.name,
       chat: this.state.chat?.name,
       replyTo: "",
-      author: `${this.props.account.owner}/${this.props.account.name}`,
+      author: this.props.account.name,
       text: text,
       isHidden: isHidden,
+      fileName: fileName,
     };
   }
 
-  sendMessage(text, isHidden) {
-    const newMessage = this.newMessage(text, isHidden);
+  sendMessage(text, fileName, isHidden) {
+    const newMessage = this.newMessage(text, fileName, isHidden);
     MessageBackend.addMessage(newMessage)
       .then((res) => {
         if (res.status === "ok") {
@@ -372,7 +373,7 @@ class ChatPage extends BaseListPage {
               </div>
             )
           }
-          <ChatBox disableInput={this.state.disableInput} messages={this.state.messages} sendMessage={(text) => {this.sendMessage(text, false);}} account={this.props.account} />
+          <ChatBox disableInput={this.state.disableInput} messages={this.state.messages} sendMessage={(text, fileName) => {this.sendMessage(text, fileName, false);}} account={this.props.account} />
         </div>
       </div>
     );

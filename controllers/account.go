@@ -80,7 +80,7 @@ func (c *ApiController) Signout() {
 	c.ResponseOk()
 }
 
-func (c *ApiController) addInitialChat(userId string) (*object.Chat, error) {
+func (c *ApiController) addInitialChat(organization string, userName string) (*object.Chat, error) {
 	store, err := object.GetDefaultStore("admin")
 	if err != nil {
 		return nil, err
@@ -89,8 +89,6 @@ func (c *ApiController) addInitialChat(userId string) (*object.Chat, error) {
 		return nil, fmt.Errorf("The default store is not found")
 	}
 
-	_, userName := util.GetOwnerAndNameFromId(userId)
-
 	randomName := util.GetRandomName()
 	currentTime := util.GetCurrentTime()
 	chat := &object.Chat{
@@ -98,14 +96,15 @@ func (c *ApiController) addInitialChat(userId string) (*object.Chat, error) {
 		Name:         fmt.Sprintf("chat_%s", randomName),
 		CreatedTime:  currentTime,
 		UpdatedTime:  currentTime,
+		Organization: organization,
 		DisplayName:  fmt.Sprintf("New Chat - %d", 1),
 		Store:        store.GetId(),
 		Category:     "Default Category",
 		Type:         "AI",
 		User:         userName,
-		User1:        userId,
+		User1:        "",
 		User2:        "",
-		Users:        []string{userId},
+		Users:        []string{userName},
 		ClientIp:     c.getClientIp(),
 		UserAgent:    c.getUserAgent(),
 		MessageCount: 0,
@@ -137,17 +136,20 @@ func (c *ApiController) addInitialChatAndMessage(user *casdoorsdk.User) error {
 		return nil
 	}
 
-	chat, err := c.addInitialChat(user.GetId())
+	organizationName := user.Owner
+	userName := user.Name
+
+	chat, err := c.addInitialChat(organizationName, userName)
 	if err != nil {
 		return err
 	}
 
 	answerMessage := &object.Message{
-		Owner:       "admin",
-		Name:        fmt.Sprintf("message_%s", util.GetRandomName()),
-		CreatedTime: util.GetCurrentTimeEx(chat.CreatedTime),
-		// Organization: message.Organization,
-		User:         user.Name,
+		Owner:        "admin",
+		Name:         fmt.Sprintf("message_%s", util.GetRandomName()),
+		CreatedTime:  util.GetCurrentTimeEx(chat.CreatedTime),
+		Organization: chat.Organization,
+		User:         userName,
 		Chat:         chat.Name,
 		ReplyTo:      "Welcome",
 		Author:       "AI",
